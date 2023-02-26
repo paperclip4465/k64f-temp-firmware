@@ -1,0 +1,24 @@
+* k64f-temp
+
+This is a simple temperature monitor which publishes temperature
+readings over MQTT.
+
+It is part of this [[https://github.com/paperclip4465/guix-embedded-example][meta-project]].
+
+* Building
+
+#+BEGIN_SRC sh
+  guix build -f guix.scm --with-source=k64f-temp-firmware=$(pwd)
+#+END_SRC
+
+Or from the Guix shell
+
+#+BEGIN_SRC sh
+  guix shell -D -f guix.scm
+
+  cmake -Bbuild . -DBOARD=frdm_k64f -DZEPHYR_MODULES=$ZEPHYR_MODULES &&
+  make -Cbuild
+#+END_SRC
+
+In the meta-project you should use the precise commit you wish to
+deploy/test against and NOT $(pwd).
