@@ -150,8 +150,11 @@ void mqtt_evt_handler(struct mqtt_client *const client,
 static char *get_mqtt_payload(enum mqtt_qos qos)
 {
 	static APP_BMEM char payload[30];
+	struct sensor_value val;
 
-	snprintf(payload, sizeof(payload), "test payload");
+	int ret = sensor_channel_get(dev, SENSOR_CHAN_DIE_TEMP, &val);
+
+	snprintf(payload, sizeof(payload), "10.6f", ret ? 0 : sensor_value_to_double(&val));
 
 	return payload;
 }
@@ -328,7 +331,7 @@ static void start_smp()
 void main(void)
 {
 	int rc;
-	dev = device_get_binding("TEMP0");
+	dev = device_get_binding("TEMP1");
 
 	if(!dev){
 		printk("Failed to find temperature device!\n");
