@@ -154,7 +154,7 @@ static char *get_mqtt_payload(enum mqtt_qos qos)
 
 	int ret = sensor_channel_get(dev, SENSOR_CHAN_DIE_TEMP, &val);
 
-	snprintf(payload, sizeof(payload), "10.6f", ret ? 0 : sensor_value_to_double(&val));
+	snprintf(payload, sizeof(payload), "%10.6f", ret ? 0 : sensor_value_to_double(&val));
 
 	return payload;
 }
