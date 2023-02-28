@@ -9,6 +9,7 @@ LOG_MODULE_REGISTER(k64_temp, LOG_LEVEL_DBG);
 #include <zephyr/net/socket.h>
 #include <zephyr/net/mqtt.h>
 #include <zephyr/net/net_conn_mgr.h>
+#include <zephyr/drivers/sensor.h>
 
 #include <mgmt/mcumgr/smp_udp.h>
 #include "os_mgmt/os_mgmt.h"
