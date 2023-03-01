@@ -25,7 +25,6 @@ LOG_MODULE_REGISTER(k64_temp, LOG_LEVEL_DBG);
 #define SERIAL_NUMBER "001"
 #define SERVER_ADDR "192.168.1.217"
 #define SERVER_PORT 1883
-#define CLIENT_ID "k64_temp:"SERIAL_NUMBER
 
 /* Buffers for MQTT client. */
 static APP_BMEM uint8_t rx_buffer[APP_MQTT_BUFFER_SIZE];
@@ -44,6 +43,7 @@ static APP_BMEM bool connected;
 
 static const struct device *dev = NULL;
 static uint32_t msg_id = 0;
+static char clientid[32];
 
 static void prepare_fds(struct mqtt_client *client)
 {
@@ -148,14 +148,27 @@ void mqtt_evt_handler(struct mqtt_client *const client,
 	}
 }
 
+static char *get_mqtt_topic(const char *topic)
+{
+	static APP_BMEM char buf[256];
+	snprintf(buf, sizeof(buf), "%s/%s", SERIAL_NUMBER, topic);
+	return buf;
+}
+
 static char *get_mqtt_payload(enum mqtt_qos qos)
 {
-	static APP_BMEM char payload[30];
+	static APP_BMEM char payload[256];
 	struct sensor_value val;
 
-	int ret = sensor_channel_get(dev, SENSOR_CHAN_DIE_TEMP, &val);
+	int ret = sensor_sample_fetch(dev);
+	if (ret < 0) {
+		LOG_ERR("Failed to read temperature.");
+		return "-999";
+	}
+	ret = sensor_channel_get(dev, SENSOR_CHAN_DIE_TEMP, &val);
 
-	snprintf(payload, sizeof(payload), "%10.6f", ret ? 0 : sensor_value_to_double(&val));
+	snprintf(payload, sizeof(payload), "%10.6f",
+		 ret ? 0 : sensor_value_to_double(&val));
 
 	return payload;
 }
@@ -165,12 +178,10 @@ static int publish(struct mqtt_client *client, enum mqtt_qos qos)
 	struct mqtt_publish_param param;
 
 	param.message.topic.qos = qos;
-	param.message.topic.topic.utf8 = (uint8_t *)"k64_temp/"SERIAL_NUMBER"/temp";
-	param.message.topic.topic.size =
-			strlen(param.message.topic.topic.utf8);
+	param.message.topic.topic.utf8 = (uint8_t *)get_mqtt_topic("temp");
+	param.message.topic.topic.size = strlen(param.message.topic.topic.utf8);
 	param.message.payload.data = get_mqtt_payload(qos);
-	param.message.payload.len =
-			strlen(param.message.payload.data);
+	param.message.payload.len = strlen(param.message.payload.data);
 	param.message_id = msg_id++;
 	param.dup_flag = 0U;
 	param.retain_flag = 0U;
@@ -198,11 +209,13 @@ static void client_init(struct mqtt_client *client)
 
 	broker_init();
 
+	snprintf(clientid, sizeof(clientid), "TEMP-%s", SERIAL_NUMBER);
+
 	/* MQTT client configuration */
 	client->broker = &broker;
 	client->evt_cb = mqtt_evt_handler;
-	client->client_id.utf8 = (uint8_t *)"k64_temp:"SERIAL_NUMBER;
-	client->client_id.size = strlen(CLIENT_ID);
+	client->client_id.utf8 = (uint8_t *)clientid;
+	client->client_id.size = strlen(clientid);
 	client->password = NULL;
 	client->user_name = NULL;
 	client->protocol_version = MQTT_VERSION_3_1_1;
