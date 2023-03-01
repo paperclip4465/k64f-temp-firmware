@@ -134,8 +134,7 @@ void mqtt_evt_handler(struct mqtt_client *const client,
 			break;
 		}
 
-		LOG_INF("PUBCOMP packet id: %u",
-			evt->param.pubcomp.message_id);
+		LOG_INF("PUBCOMP packet id: %u", evt->param.pubcomp.message_id);
 
 		break;
 
@@ -191,8 +190,7 @@ static int publish(struct mqtt_client *client, enum mqtt_qos qos)
 
 #define RC_STR(rc) ((rc) == 0 ? "OK" : "ERROR")
 
-#define PRINT_RESULT(func, rc) \
-	LOG_INF("%s: %d <%s>", (func), rc, RC_STR(rc))
+#define PRINT_RESULT(func, rc) LOG_INF("%s: %d <%s>", (func), rc, RC_STR(rc))
 
 static void broker_init(void)
 {
@@ -338,15 +336,25 @@ static void start_smp()
 	start_smp_udp();
 }
 
-#define SUCCESS_OR_EXIT(rc) { if (rc != 0) { return; } }
-#define SUCCESS_OR_BREAK(rc) { if (rc != 0) { break; } }
+#define SUCCESS_OR_EXIT(rc)                                                    \
+	{                                                                      \
+		if (rc != 0) {                                                 \
+			return;                                                \
+		}                                                              \
+	}
+#define SUCCESS_OR_BREAK(rc)                                                   \
+	{                                                                      \
+		if (rc != 0) {                                                 \
+			break;                                                 \
+		}                                                              \
+	}
 
 void main(void)
 {
 	int rc;
 	dev = device_get_binding("TEMP1");
 
-	if(!dev){
+	if (!dev) {
 		printk("Failed to find temperature device!\n");
 		return;
 	}
