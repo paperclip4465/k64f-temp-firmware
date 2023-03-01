@@ -236,13 +236,12 @@ static int try_to_connect(struct mqtt_client *client)
 	int rc, i = 0;
 
 	while (i++ < APP_CONNECT_TRIES && !connected) {
-
 		client_init(client);
 
 		rc = mqtt_connect(client);
 		if (rc != 0) {
 			PRINT_RESULT("mqtt_connect", rc);
-			k_sleep(K_MSEC(APP_SLEEP_MSECS));
+			k_sleep(K_MSEC(1000));
 			continue;
 		}
 
@@ -363,13 +362,13 @@ void main(void)
 		rc = mqtt_ping(&client_ctx);
 		SUCCESS_OR_BREAK(rc);
 
-		rc = process_mqtt_and_sleep(&client_ctx, 0);
+		rc = process_mqtt_and_sleep(&client_ctx, 100);
 		SUCCESS_OR_BREAK(rc);
 
 		rc = publish(&client_ctx, MQTT_QOS_0_AT_MOST_ONCE);
 		SUCCESS_OR_BREAK(rc);
 
-		rc = process_mqtt_and_sleep(&client_ctx, 0);
+		rc = process_mqtt_and_sleep(&client_ctx, 100);
 		SUCCESS_OR_BREAK(rc);
 
 		k_sleep(K_SECONDS(60));
