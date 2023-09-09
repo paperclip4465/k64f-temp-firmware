@@ -10,11 +10,12 @@
   (home-page "https://github.com/paperclip4465/guix-embedded-example")
   (source #f)
   (build-system zephyr-build-system)
+  (outputs '("out" "debug"))
   (arguments
-   `(#:zephyr ,zephyr-3.1))
-  (inputs (list hal-cmsis
-		hal-nxp
-		zcbor
+   '(#:bin-name "k64f-temp-firmware"))
+  (inputs (list zephyr-cmsis
+		zephyr-hal-nxp
+		zephyr-zcbor
 		zephyr-mcuboot))
   (synopsis "Temperature measurement firmware for the k64f.")
   (description "Temperature measurement firmware for the k64f.")
